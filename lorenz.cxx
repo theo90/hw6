@@ -1,104 +1,79 @@
-#include "stdafx.h"
 #include <iostream>
-#include "conio.h"
 #include <fstream>
 
-void runge_kutta ( double *x, double *y,double *z, const int n, const double dx, const double a, const double b, const double c);
-double funx(double x1,  double y1,const double a);
-double funy (double x1, double y1, double z1, const double b);
-double funz (double x1, double y1,double z1, const double c);
 
+void fun(double* ki, double x,double y,double z,const int a, const int b, const int c );
+void delet_temp(double* temp);
 
 
 using namespace std;
 
 int main()
 {
-	double x1;
-	double y1;
-	double z1;
-	const double dx=0.1;
-	const int n=1000;
 	
-	//double f[2];
-	double *x=new double[n];
-	double *y=new double[n];
-	double *z=new double[n];
-	//double *f=new double[2];
-	
-
+	const double dx=0.01;
+	const double T=100;
+	const int n=10000;
 	const double a=10.0;
 	const double b=28.0;
 	const double c=2.666;
-
-	runge_kutta ( x,y,z,n,dx, a,b,c);
-    //file_make(x, y, z, n, step);
+	double *x= new double [n];
+	double *y= new double [n];
+	double *z= new double [n];
+	double k1[3],k2[3],k3[3],k4[3];
+	double temp[3];
+	x[0]=1;
+	y[0]=1;
+	z[0]=1;
+	ofstream out("runge_kutta3.txt");
+	for (int i=1; i<n; i++)
+	{
+		//k1-bestimmen
+		fun(k1, x[i-1],y[i-1],z[i-1], a,  b, c );
+		//k2-bestimmen
+		for(int j=0; j<3; j++)
+		{
+			fun(temp,x[i-1]+dx*k1[j]*0.5, y[i-1]+dx*k1[j]*0.5, z[i-1]+dx*k1[j]*0.5,a, b, c);
+			k2[j]=temp[j];
+			delet_temp(temp);
+		}
+		//k3-bestimmen
+		for(int j=0; j<3; j++)
+		{
+			fun(temp,x[i-1]+dx*k2[j]*0.5, y[i-1]+dx*k2[j]*0.5, z[i-1]+dx*k2[j]*0.5,a, b, c);
+			k3[j]=temp[j];
+			delet_temp(temp);
+		}
+		//k4-bestimmen
+		for(int j=0; j<3; j++)
+		{
+			fun(temp,x[i-1]+dx*k3[j]*0.5, y[i-1]+dx*k3[j]*0.5, z[i-1]+dx*k3[j]*0.5,a, b, c);
+			k4[j]=temp[j];
+			delet_temp(temp);
+		}
+		
+		x[i]=x[i-1]+dx/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);
+		y[i]=y[i-1]+dx/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);
+		z[i]=z[i-1]+dx/6*(k1[2]+2*k2[2]+2*k3[2]+k4[2]);
+		out<<(i-1)*dx<<" \t "<< x[i-1] <<" \t "<< y[i-1]<<" \t "<<z[i-1]<<endl;
+	}
 	delete [] x;
 	delete [] y;
 	delete [] z;
 
-	getche();
+	
     return 0;
 }
 
-void runge_kutta ( double *x, double *y,double *z, const int n, const double dx, const double a, const double b, const double c)
+
+void fun(double* ki, double x,double y,double z,const int a, const int b, const int c ) //f[0]->x, f[1]->y, f[2]->z
 {
-	x[0]=1;
-	y[0]=1;
-	z[0]=1;
-	double kx[4];
-	double ky[4];
-	double kz[4];
-
-	ofstream out("runge_kutta.txt");
-
-	for(int i=1; i<n; i++)
-	{
-		// berechnung von x
-		
-		kx[0]=funx(x[i-1],y[i-1],a);
-		kx[1]=funx(x[i-1]+dx*0.5*kx[0],y[i-1]+dx*0.5*kx[0],a);
-		kx[2]=funx(x[i-1]+dx*0.5*kx[1],y[i-1]+dx*0.5*kx[1],a);
-		kx[3]=funx(x[i-1]+dx*kx[2],y[i-1]+dx*kx[2],a);
-		
-
-		x[i]=x[i-1]+dx*0.1666*(kx[0]+2*kx[1]+2*kx[2]+kx[3]);
-
-		//berechnung von y
-		ky[0]=funy(x[i-1],y[i-1],z[i-1],a);
-		ky[1]=funy(x[i-1]+dx*0.5*ky[0],y[i-1]+dx*0.5*ky[0],z[i-1]+dx*0.5*ky[0],a);
-		ky[2]=funy(x[i-1]+dx*0.5*ky[1],y[i-1]+dx*0.5*ky[1],z[i-1]+dx*0.5*ky[1],a);
-		ky[3]=funy(x[i-1]+dx*ky[2],y[i-1]+dx*ky[2],z[i-1]+dx*0.5*ky[2],a);
-		
-		y[i]=y[i-1]+dx*0.1666*(ky[0]+2*ky[1]+2*ky[2]+ky[3]);
-
-		kz[0]=funz(x[i-1],y[i-1],z[i-1],c);
-		kz[1]=funz(x[i-1]+dx*0.5*kz[0],y[i-1]+dx*0.5*kz[0],z[i-1]+dx*0.5*kz[0],c);
-		kz[2]=funz(x[i-1]+dx*0.5*kz[1],y[i-1]+dx*0.5*kz[1],z[i-1]+dx*0.5*kz[1],c);
-		kz[3]=funz(x[i-1]+dx*kz[2],y[i-1]+dx*kz[2],z[i-1]+dx*kz[2],c);
-		
-		z[i]=z[i-1]+dx*0.1666*(kz[0]+2*kz[1]+2*kz[2]+kz[3]);
-
-		out<<i*dx<<" \t"<<x[i-1]<<" \t"<<y[i-1]<<" \t"<<z[i-1]<<endl;
-		
-
-	}
-	out.close();
-	
+	ki[0]=a*(y-x);
+	ki[1]=x*(b-z)-y;
+	ki[2]=(x*y-c*z);
 }
-
-
-double funx(double x1,  double y1,const double a)
+void delet_temp(double* temp)
 {
-	return(a*(y1-x1));
-}
-
-double funy (double x1, double y1, double z1, const double b)
-{
-	return(x1*(b-z1)-y1);
-}
-double funz (double x1, double y1,double z1, const double c)
-{
-	
-	return(x1*y1-c*z1);
+	for(int i=0; i<3; i++)
+		temp[i]=0;
 }
