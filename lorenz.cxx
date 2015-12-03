@@ -13,7 +13,7 @@ int main()
 	
 	const double dx=0.01;
 	const double T=100;
-	const int n=10000;
+	const int n=(int)T/dx;
 	const double a=10.0;
 	const double b=28.0;
 	const double c=2.666;
