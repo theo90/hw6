@@ -33,21 +33,10 @@ int main()
 		//k1-bestimmen
 		fun(k1, x[i-1],y[i-1],z[i-1], a,  b, c );
 		//k2-bestimmen
-		for(int j=0; j<3; j++)
-		{
-			
-			fun(k2,x[i-1]+dx*k1[j]*0.5, y[i-1]+dx*k1[j+1]*0.5, z[i-1]+dx*k1[j+2]*0.5,a, b, c);
-		}
-
-		for(int j=0; j<3; j++)
-		{
-			fun(k3,x[i-1]+dx*k2[j]*0.5, y[i-1]+dx*k2[j+1]*0.5, z[i-1]+dx*k2[j+2]*0.5,a, b, c);
-			
-		}
-		for(int j=0; j<3; j++)
-		{
-			fun(k4,x[i-1]+dx*k3[j], y[i-1]+dx*k3[j+1], z[i-1]+dx*k3[j+2],a, b, c);
-		}
+		fun(k2,x[i-1]+dx*k1[0]*0.5, y[i-1]+dx*k1[1]*0.5, z[i-1]+dx*k1[2]*0.5,a, b, c);
+		
+		fun(k3,x[i-1]+dx*k2[0]*0.5, y[i-1]+dx*k2[1]*0.5, z[i-1]+dx*k2[2]*0.5,a, b, c);
+	        fun(k4,x[i-1]+dx*k3[0], y[i-1]+dx*k3[1], z[i-1]+dx*k3[2],a, b, c);
 		
 		x[i]=x[i-1]+dx/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);
 		y[i]=y[i-1]+dx/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);
